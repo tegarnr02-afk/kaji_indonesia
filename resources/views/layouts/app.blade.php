@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Kaji Indonesia' }} | Kaji Indonesia</title>
+     {{-- Tambahkan di sini --}}
+    <link rel="icon" type="image/png" href="{{ asset('storage/logo/logo.png') }}">
     <meta name="description" content="{{ $metaDescription ?? 'Kaji Indonesia - Membangun Indonesia melalui kajian, pelatihan, pendampingan UMKM, Halal Center, dan konsultasi profesional.' }}">
     <meta name="keywords" content="{{ $metaKeywords ?? 'Kaji Indonesia, pelatihan, UMKM, halal, konsultan, kajian' }}">
     <meta name="author" content="Kaji Indonesia">

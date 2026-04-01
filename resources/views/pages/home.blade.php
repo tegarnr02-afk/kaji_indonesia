@@ -33,46 +33,76 @@
         </div>
     </section>
 
-    {{-- 2. STATISTIK --}}
-    <section class="bg-white py-16 sm:py-20" id="statistik"
-             x-data="{
-                 shown: false,
-                 counters: { peserta: 0, umkm: 0, konsultan: 0, tahun: 0 },
-                 target: { peserta: 5000, umkm: 1200, konsultan: 85, tahun: 10 },
-                 step() {
-                     if (!this.shown) return;
-                     const speed = 80;
-                     ['peserta','umkm','konsultan','tahun'].forEach(k => {
-                         if (this.counters[k] < this.target[k]) {
-                             const add = Math.ceil(this.target[k] / speed);
-                             this.counters[k] = Math.min(this.counters[k] + add, this.target[k]);
-                         }
-                     });
-                 }
-             }"
-             x-intersect.once="shown = true"
-             x-effect="if (shown) { const id = setInterval(() => step(), 25); return () => clearInterval(id); }">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 gap-6 lg:grid-cols-4">
-                <div class="rounded-2xl bg-gray-50 p-6 text-center shadow-lg ring-1 ring-gray-200/50">
-                    <p class="font-serif text-4xl font-bold text-primary sm:text-5xl" x-text="counters.peserta.toLocaleString('id-ID')">0</p>
-                    <p class="mt-1 text-sm font-medium text-gray-600">Peserta Pelatihan</p>
-                </div>
-                <div class="rounded-2xl bg-gray-50 p-6 text-center shadow-lg ring-1 ring-gray-200/50">
-                    <p class="font-serif text-4xl font-bold text-primary sm:text-5xl" x-text="counters.umkm.toLocaleString('id-ID')">0</p>
-                    <p class="mt-1 text-sm font-medium text-gray-600">UMKM Dampingan</p>
-                </div>
-                <div class="rounded-2xl bg-gray-50 p-6 text-center shadow-lg ring-1 ring-gray-200/50">
-                    <p class="font-serif text-4xl font-bold text-primary sm:text-5xl" x-text="counters.konsultan">0</p>
-                    <p class="mt-1 text-sm font-medium text-gray-600">Konsultan Aktif</p>
-                </div>
-                <div class="rounded-2xl bg-gray-50 p-6 text-center shadow-lg ring-1 ring-gray-200/50 col-span-2 lg:col-span-1">
-                    <p class="font-serif text-4xl font-bold text-primary sm:text-5xl" x-text="counters.tahun">0</p>
-                    <p class="mt-1 text-sm font-medium text-gray-600">Tahun Pengalaman</p>
-                </div>
+ {{-- 2. STATISTIK --}}
+<section class="bg-white py-16 sm:py-20" id="statistik"
+         x-data="{
+             shown: false,
+             counters: { event: 0, speakers: 0, participants: 0, topics: 0 },
+             target: { event: 108, speakers: 512, participants: 15053, topics: 1024 },
+             intervalId: null,
+             step() {
+                 const speed = 80;
+                 let selesai = true;
+                 ['event','speakers','participants','topics'].forEach(k => {
+                     if (this.counters[k] < this.target[k]) {
+                         selesai = false;
+                         const add = Math.ceil(this.target[k] / speed);
+                         this.counters[k] = Math.min(this.counters[k] + add, this.target[k]);
+                     }
+                 });
+                 if (selesai) clearInterval(this.intervalId);
+             },
+             mulai() {
+                 if (this.shown) return;
+                 this.shown = true;
+                 this.intervalId = setInterval(() => this.step(), 20);
+             }
+         }"
+         x-init="
+             const observer = new IntersectionObserver((entries) => {
+                 entries.forEach(entry => {
+                     if (entry.isIntersecting) {
+                         mulai();
+                         observer.disconnect();
+                     }
+                 });
+             }, { threshold: 0.2 });
+             observer.observe($el);
+         ">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+
+            {{-- Acara --}}
+            <div class="rounded-2xl border border-gray-100 bg-gray-50 p-6 text-center transition-all duration-300 hover:border-primary/20 hover:bg-primary/5">
+                <p class="text-4xl font-bold tracking-tight text-primary sm:text-5xl"
+                   x-text="counters.event.toLocaleString('id-ID')">0</p>
+                <p class="mt-2 text-sm text-gray-500">Acara</p>
             </div>
+
+            {{-- Pembicara --}}
+            <div class="rounded-2xl border border-gray-100 bg-gray-50 p-6 text-center transition-all duration-300 hover:border-primary/20 hover:bg-primary/5">
+                <p class="text-4xl font-bold tracking-tight text-primary sm:text-5xl"
+                   x-text="counters.speakers.toLocaleString('id-ID')">0</p>
+                <p class="mt-2 text-sm text-gray-500">Pembicara</p>
+            </div>
+
+            {{-- Peserta --}}
+            <div class="rounded-2xl border border-gray-100 bg-gray-50 p-6 text-center transition-all duration-300 hover:border-primary/20 hover:bg-primary/5">
+                <p class="text-4xl font-bold tracking-tight text-primary sm:text-5xl"
+                   x-text="counters.participants.toLocaleString('id-ID')">0</p>
+                <p class="mt-2 text-sm text-gray-500">Peserta</p>
+            </div>
+
+            {{-- Topik Dibahas --}}
+            <div class="col-span-2 rounded-2xl border border-gray-100 bg-gray-50 p-6 text-center transition-all duration-300 hover:border-primary/20 hover:bg-primary/5 lg:col-span-1">
+                <p class="text-4xl font-bold tracking-tight text-primary sm:text-5xl"
+                   x-text="counters.topics.toLocaleString('id-ID')">0</p>
+                <p class="mt-2 text-sm text-gray-500">Topik Dibahas</p>
+            </div>
+
         </div>
-    </section>
+    </div>
+</section>
 
     {{-- 3. LAYANAN UNGGULAN --}}
     <section class="bg-gray-50 py-16 sm:py-20" id="layanan">
@@ -128,81 +158,118 @@
         </div>
     </section>
 
-    {{-- 4. TENTANG KAMI --}}
-    <section class="bg-white py-16 sm:py-20" id="tentang-kami">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
-                <div class="relative overflow-hidden rounded-2xl bg-gray-100">
-                    <div class="aspect-[4/3] flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary-light/20">
-                        <svg class="h-48 w-48 text-primary/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                        </svg>
-                    </div>
-                </div>
-                <div>
-                    <h2 class="font-serif text-3xl font-bold text-gray-900 sm:text-4xl">Tentang Kami</h2>
-                    <p class="mt-4 text-gray-600">
-                        Kaji Indonesia berkomitmen menjadi mitra terpercaya dalam pemberdayaan masyarakat dan dunia usaha melalui kajian yang mendalam, pelatihan berkualitas, serta pendampingan berkelanjutan—dengan integritas dan nilai-nilai islami.
-                    </p>
-                    <div class="mt-6 space-y-4">
-                        <div>
-                            <h3 class="font-semibold text-gray-900">Visi</h3>
-                            <p class="mt-1 text-sm text-gray-600">Menjadi lembaga terdepan dalam pengembangan SDM dan UMKM yang berdaya saing dan berakhlak mulia.</p>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-gray-900">Misi</h3>
-                            <ul class="mt-2 space-y-1 text-sm text-gray-600">
-                                <li class="flex items-start gap-2"><span class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary"><svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></span> Menyelenggarakan pelatihan dan kajian yang aplikatif dan terukur.</li>
-                                <li class="flex items-start gap-2"><span class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary"><svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></span> Mendampingi UMKM dan pelaku usaha menuju sertifikasi halal dan tata kelola yang baik.</li>
-                                <li class="flex items-start gap-2"><span class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary"><svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></span> Menyediakan layanan konsultasi yang profesional dan berorientasi hasil.</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <ul class="mt-6 space-y-2">
-                        <li class="flex items-center gap-2 text-sm text-gray-700"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-secondary/20 text-secondary"><svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></span> Berpengalaman dan tersertifikasi</li>
-                        <li class="flex items-center gap-2 text-sm text-gray-700"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-secondary/20 text-secondary"><svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></span> Pendekatan islami dan profesional</li>
-                        <li class="flex items-center gap-2 text-sm text-gray-700"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-secondary/20 text-secondary"><svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></span> Jangkauan nasional</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
+ {{-- 4. TENTANG KAMI --}}
+<section class="bg-white py-16 sm:py-20" id="tentang-kami">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
 
-    {{-- 5. TESTIMONI / PARTNER --}}
-    <section class="bg-gray-50 py-16 sm:py-20">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <h2 class="font-serif text-3xl font-bold text-gray-900 sm:text-4xl">Apa Kata Mereka</h2>
-                <p class="mx-auto mt-3 max-w-2xl text-gray-600">Testimoni dari mitra dan peserta program Kaji Indonesia.</p>
+        {{-- Header Tengah --}}
+        <div class="text-center mb-6">
+            <h2 class="font-serif text-3xl font-bold text-gray-900 sm:text-4xl">Tentang Kami</h2>
+        </div>
+
+        {{-- Konten: Logo kiri sejajar Teks kanan --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:items-stretch">
+
+         {{-- Kiri: Logo --}}
+<div class="flex items-center justify-center" style="min-height: 280px;">
+    <img
+        src="{{ asset('storage/logo/logo_kaji.png') }}"
+        alt="Logo Kaji Indonesia"
+        class="object-contain"
+        style="height: 280px; width: auto;"
+    />
+</div>
+
+            {{-- Kanan: Deskripsi --}}
+            <div class="flex flex-col justify-center" style="min-height: 280px;">
+                <p class="text-gray-600 leading-relaxed text-sm sm:text-base text-justify">
+                    <span class="font-semibold text-gray-800">KAJI INDONESIA</span> adalah lembaga yang berfokus pada penguatan kolaborasi antar komunitas, organisasi, dan instansi. Berdiri sejak <span class="font-semibold text-primary">2008</span> sebagai penghubung komunitas di Jawa Timur, kini berkembang menjadi jaringan kolaboratif berskala nasional.
+                </p>
+                <p class="mt-4 text-gray-600 leading-relaxed text-sm sm:text-base text-justify">
+                    Resmi menjadi lembaga nasional pada <span class="font-semibold text-primary">2012</span>, KAJI menghadirkan sinergi aktif dan berkelanjutan melalui inkubator bisnis dan layanan konsultasi untuk mendukung pertumbuhan ekonomi dan kualitas SDM.
+                </p>
+                <p class="mt-4 text-gray-600 leading-relaxed text-sm sm:text-base text-justify">
+                    Dengan pendekatan <span class="font-medium text-gray-800">digital, legal, dan modern</span>, KAJI mendorong ekosistem kewirausahaan yang mandiri dan berdaya saing hingga tingkat global.
+                </p>
+                <div class="mt-6 flex flex-wrap gap-2">
+                    <span class="inline-flex items-center rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary ring-1 ring-primary/20">Sejak 2008</span>
+                    <span class="inline-flex items-center rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary ring-1 ring-primary/20">Lembaga Nasional</span>
+                    <span class="inline-flex items-center rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary ring-1 ring-primary/20">Jaringan Global</span>
+                </div>
             </div>
-            <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                <div class="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-200/50">
-                    <p class="text-gray-700">"Pelatihan dari Kaji Indonesia sangat aplikatif. Tim kami langsung bisa mengimplementasikan di lapangan."</p>
-                    <p class="mt-4 font-semibold text-gray-900">Bapak Ahmad, Direktur HR</p>
-                    <p class="text-sm text-gray-500">Perusahaan Manufaktur</p>
-                </div>
-                <div class="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-200/50">
-                    <p class="text-gray-700">"Pendampingan UMKM dan proses sertifikasi halal kami berjalan lancar. Recommended."</p>
-                    <p class="mt-4 font-semibold text-gray-900">Ibu Siti, Pemilik UMKM</p>
-                    <p class="text-sm text-gray-500">Produk Makanan</p>
-                </div>
-                <div class="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-200/50 sm:col-span-2 lg:col-span-1">
-                    <p class="text-gray-700">"Konsultan profesional dan komunikatif. Hasil rekomendasi strategi sangat membantu perkembangan bisnis kami."</p>
-                    <p class="mt-4 font-semibold text-gray-900">Bapak Rudi, CEO Startup</p>
-                    <p class="text-sm text-gray-500">Teknologi</p>
-                </div>
+
+        </div>
+    </div>
+</section>
+
+   {{-- 5. TESTIMONI / PARTNER --}}
+<section class="bg-gray-50 py-16 sm:py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        
+        {{-- Testimoni --}}
+        <div class="text-center">
+            <h2 class="font-serif text-3xl font-bold text-gray-900 sm:text-4xl">Apa Kata Mereka</h2>
+            <p class="mx-auto mt-3 max-w-2xl text-gray-600">Testimoni dari mitra dan peserta program Kaji Indonesia.</p>
+        </div>
+        <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-200/50">
+                <p class="text-gray-700">"Pelatihan dari Kaji Indonesia sangat aplikatif. Tim kami langsung bisa mengimplementasikan di lapangan."</p>
+                <p class="mt-4 font-semibold text-gray-900">Bapak Ahmad, Direktur HR</p>
+                <p class="text-sm text-gray-500">Perusahaan Manufaktur</p>
             </div>
-            <div class="mt-12 border-t border-gray-200 pt-12">
-                <p class="text-center text-sm font-medium uppercase tracking-wider text-gray-500">Dipercaya oleh</p>
-                <div class="mt-6 flex flex-wrap items-center justify-center gap-8 grayscale opacity-70">
-                    <div class="h-10 w-24 rounded-lg bg-gray-200 flex items-center justify-center text-xs text-gray-500">Partner 1</div>
-                    <div class="h-10 w-24 rounded-lg bg-gray-200 flex items-center justify-center text-xs text-gray-500">Partner 2</div>
-                    <div class="h-10 w-24 rounded-lg bg-gray-200 flex items-center justify-center text-xs text-gray-500">Partner 3</div>
-                    <div class="h-10 w-24 rounded-lg bg-gray-200 flex items-center justify-center text-xs text-gray-500">Partner 4</div>
-                </div>
+            <div class="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-200/50">
+                <p class="text-gray-700">"Pendampingan UMKM dan proses sertifikasi halal kami berjalan lancar. Recommended."</p>
+                <p class="mt-4 font-semibold text-gray-900">Ibu Siti, Pemilik UMKM</p>
+                <p class="text-sm text-gray-500">Produk Makanan</p>
+            </div>
+            <div class="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-200/50 sm:col-span-2 lg:col-span-1">
+                <p class="text-gray-700">"Konsultan profesional dan komunikatif. Hasil rekomendasi strategi sangat membantu perkembangan bisnis kami."</p>
+                <p class="mt-4 font-semibold text-gray-900">Bapak Rudi, CEO Startup</p>
+                <p class="text-sm text-gray-500">Teknologi</p>
             </div>
         </div>
-    </section>
+
+        {{-- Partner --}}
+        <div class="mt-16 border-t border-gray-200 pt-12">
+            <p class="text-center text-sm font-medium uppercase tracking-wider text-gray-500">Dipercaya oleh</p>
+
+            @php
+                $partners = [
+                    ['image' => 'partners/Partner-01.png', 'name' => 'Partner 1'],
+                    ['image' => 'partners/partner-02.png', 'name' => 'Partner 2'],
+                    ['image' => 'partners/partner-03.png', 'name' => 'Partner 3'],
+                    ['image' => 'partners/partner-04.png', 'name' => 'Partner 4'],
+                    ['image' => 'partners/partner-05.png', 'name' => 'Partner 5'],
+                    ['image' => 'partners/partner-06.jpg', 'name' => 'Partner 6'],
+                    ['image' => 'partners/partner-07.png', 'name' => 'Partner 7'],
+                    ['image' => 'partners/partner-08.png', 'name' => 'Partner 8'],
+                    ['image' => 'partners/partner-09.jpg', 'name' => 'Partner 9'],
+                    ['image' => 'partners/partner-10.png', 'name' => 'Partner 10'],
+                    ['image' => 'partners/partner-11.png', 'name' => 'Partner 11'],
+                    ['image' => 'partners/partner-12.png', 'name' => 'Partner 12'],
+                    ['image' => 'partners/partner-13.jpeg', 'name' => 'Partner 13'],
+                    ['image' => 'partners/partner-14.jpeg', 'name' => 'Partner 14'],
+                    ['image' => 'partners/partner-15.jpg', 'name' => 'Partner 15'],
+                    ['image' => 'partners/partner-16.png', 'name' => 'Partner 16'],
+                    ['image' => 'partners/partner-17.png', 'name' => 'Partner 17'],
+                ];
+            @endphp
+
+           <div class="mt-8 flex flex-wrap justify-center gap-4">
+    @foreach ($partners as $partner)
+        <div class="group flex items-center justify-center rounded-xl bg-white px-8 py-5 shadow-sm ring-1 ring-gray-200/60 transition-all duration-300 hover:shadow-md hover:ring-gray-300">
+            <img
+                src="{{ asset('storage/' . $partner['image']) }}"
+                alt="{{ $partner['name'] }}"
+                class="h-14 w-auto max-w-[140px] object-contain transition-all duration-300 group-hover:scale-105"
+                loading="lazy"
+            />
+        </div>
+    @endforeach
+</div>
+
+    </div>
+</section>
 
     {{-- 6. CTA BANNER --}}
     <section class="bg-primary py-16 sm:py-20" id="kontak">
